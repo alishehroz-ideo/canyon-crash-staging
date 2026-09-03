@@ -19,10 +19,16 @@
         -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
       }
 
-      /* Full-viewport shell. Solid dark = clean loading backdrop + clean letterbox bars. */
+      /* Full-viewport shell. The game's own key art, blurred and darkened, sits behind the loading
+         icon and progress bar so a player can tell what is downloading; #0e0e12 stays underneath
+         as the fallback while the JPG is in flight, and paints the letterbox bars.
+         `cover`, never `100% 100%`: cover crops, stretch distorts, and portrait art stretched into
+         a wide viewport looks broken. Baked by Tools/bake_loading_bg.py — never a CSS blur(), which
+         is expensive on phones on exactly the screen that renders while the device is downloading
+         tens of megabytes of wasm. */
       #unity-container {
         position: fixed; inset: 0;
-        background: #0e0e12;
+        background: #0e0e12 url('TemplateData/loading-bg.jpg') center / cover no-repeat;
       }
 
       /* Canvas is positioned by JS (letterbox). Transparent so the backdrop shows through
@@ -106,7 +112,7 @@
       // so the Unity download is never delayed, and every failure path falls back to the static
       // TemplateData/game-icon.png.
       (function loadTenantIcon() {
-        var DEFAULT_API_BASE = "https://api.staging.g-b.store";   // staging; ?apiBase= overrides
+        var DEFAULT_API_BASE = "https://api.staging.g-b.store";   // set by GameBullEnvironment; ?apiBase= from the URL still wins
         var DEFAULT_GAME_ID  = "CANYON_CRASH";            // fallback only; ?gameId= from URL wins
         var FETCH_TIMEOUT_MS = 4000;
 
