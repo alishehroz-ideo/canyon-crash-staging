@@ -25,7 +25,13 @@
          `cover`, never `100% 100%`: cover crops, stretch distorts, and portrait art stretched into
          a wide viewport looks broken. Baked by Tools/bake_loading_bg.py — never a CSS blur(), which
          is expensive on phones on exactly the screen that renders while the device is downloading
-         tens of megabytes of wasm. */
+         tens of megabytes of wasm.
+
+         THIS BACKGROUND ALSO PAINTS THE LETTERBOX BARS, so the image is taken back off in the
+         createUnityInstance().then() handler below (search: container.style.background) the moment
+         Unity renders. Leaving it set puts a band of blurred art above and below the game for the
+         whole session. The two halves are forty lines and one language apart -- change one, change
+         the other. #0e0e12 must stay identical to GROUND in Tools/bake_loading_bg.py. */
       #unity-container {
         position: fixed; inset: 0;
         background: #0e0e12 url('TemplateData/loading-bg.jpg') center / cover no-repeat;
@@ -261,6 +267,14 @@
           killEl("#unity-progress-bar-empty");
           killEl("#unity-progress-percent");
           killEl("#unity-loading-bar");
+
+          // The backdrop is a LOADING backdrop. #unity-container is the full viewport and the
+          // canvas is letterboxed inside it, so leaving the image set keeps painting it in the
+          // BARS for the whole session, with a visible seam at the canvas edge. Drop back to the
+          // flat ground colour once Unity renders. Paired with the #unity-container rule above --
+          // change one, change the other.
+          var container = document.querySelector("#unity-container");
+          if (container) container.style.background = "#0e0e12";
 
           resizeCanvas();
 
